@@ -1,0 +1,13 @@
+/* Custom Scrollbar for horizontal scrolling */
+.scrollable-div::-webkit-scrollbar {
+  height: 10px;
+}
+
+.scrollable-div::-webkit-scrollbar-thumb {
+  background: blue;
+  border-radius: 9999px;
+}
+
+.scrollable-div::-webkit-scrollbar-track {
+  background: #d8d4d4;
+}
