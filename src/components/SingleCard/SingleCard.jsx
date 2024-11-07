@@ -6,13 +6,12 @@ import { FaRegCalendarAlt } from "react-icons/fa";
 import { useRef, useState } from "react";
 import PropTypes from "prop-types";
 import "./SingleCard.css";
+import axios from "axios";
 
-export default function SingleCard({ data, heading }) {
+export default function SingleCard({ data, heading, fetchData }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState([]);
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
     file: null,
   });
   // Reference for file input to clear it
@@ -20,41 +19,51 @@ export default function SingleCard({ data, heading }) {
 
   // Function to handle form input change
   const handleInputChange = (e) => {
-    const { name, value, files } = e.target;
+    const { name, files } = e.target;
     if (name === "file") {
       setFormData((prevData) => ({
         ...prevData,
-        file: files[0], // Set the file object
+        file: files[0],
       }));
-    } else {
-      setFormData((prevData) => ({
-        ...prevData,
-        [name]: value,
-      }));
+    }
+  };
+
+  // Function to handle post data
+  const postData = (item, newData) => {
+    console.log(item);
+    console.log(newData);
+    const { _id, ...newItem } = item;
+    console.log(_id)
+    const updatedData = {
+      ...newItem,
+      attachments: [...item.attachments, { name: newData }],
+    };
+    console.log(updatedData)
+    if (updatedData) {
+      axios
+        .patch(`http://localhost:3000/all-data/${item._id}`, updatedData)
+        .then((res) => {
+          if (res.data.modifiedCount > 0) {
+            alert("Attachment Uploaded Successfully");
+            fetchData();
+          }
+        });
     }
   };
 
   // Function to open/close modal
   const toggleModal = (item = []) => {
     setIsOpen(!isOpen);
-    setSelectedItem(item); // Set the clicked item when opening the modal
-    if (item) {
-      setFormData((prevData) => ({
-        ...prevData,
-        name: item.title || "", // Assuming the item's name is stored in `title`
-      }));
-    }
+    setSelectedItem(item);
   };
 
   // Function to handle form submission
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log(formData); // Handle form submission logic here
+  const handleSubmit = (item) => {
+    // console.log(formData.file.name);
+    postData(item, formData.file.name);
 
     // Reset form data and clear file input
     setFormData({
-      name: "",
-      email: "",
       file: null,
     });
 
@@ -132,7 +141,7 @@ export default function SingleCard({ data, heading }) {
                 <p className="text-sm">15</p>
               </div>
               <div className="flex items-center gap-1">
-                <button onClick={() => toggleModal(item.attachments)}>
+                <button onClick={() => toggleModal(item)}>
                   <FaPaperclip />
                 </button>
                 <p className="text-sm">{item.attachments.length}</p>
@@ -151,36 +160,15 @@ export default function SingleCard({ data, heading }) {
       {/* Modal */}
       {isOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-[600px]">
-            <h2 className="text-lg font-bold mb-4">Form</h2>
+          <div className="bg-white rounded-lg shadow-lg p-6 w-[800px]">
+            <h2 className="text-lg font-bold mb-4">Attach File</h2>
 
             <div className="flex">
               {/* Form Section */}
-              <form onSubmit={handleSubmit} className="w-1/2 pr-4">
-                <div className="mb-4">
-                  <label className="block text-gray-700">Name:</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    className="w-full border border-gray-300 p-2 rounded mt-1"
-                    required
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <label className="block text-gray-700">Email:</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="w-full border border-gray-300 p-2 rounded mt-1"
-                    required
-                  />
-                </div>
-
+              <form
+                onSubmit={() => handleSubmit(selectedItem)}
+                className="w-1/2 pr-4"
+              >
                 <div className="mb-4">
                   <label className="block text-gray-700">Upload File:</label>
                   <input
@@ -211,12 +199,14 @@ export default function SingleCard({ data, heading }) {
               </form>
 
               {/* List Section */}
-              <div className="w-1/2 pl-4 border-l border-gray-300">
+              <div className="w-[700px] overflow-auto pl-4 border-l border-gray-300">
                 <h3 className="text-md font-semibold mb-2">List of Items</h3>
                 <ul className="list-disc pl-5">
-                  {selectedItem.map((item, index) => (
+                  {selectedItem.attachments.map((item, index) => (
                     <li key={index} className="mb-2">
+                      <p>
                       {item.name}
+                      </p>
                     </li>
                   ))}
                 </ul>
@@ -230,6 +220,7 @@ export default function SingleCard({ data, heading }) {
 }
 // Define prop types
 SingleCard.propTypes = {
-  data: PropTypes.object.isRequired, // Update the shape/type based on your data structure
+  data: PropTypes.object.isRequired,
   heading: PropTypes.string.isRequired,
+  fetchData: PropTypes.func.isRequired
 };
