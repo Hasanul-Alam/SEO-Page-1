@@ -6,7 +6,7 @@ function App() {
   const [data, setData] = useState([]);
 
   const fetchData = () => {
-    fetch("http://localhost:3000/all-data")
+    fetch("https://seo-page-1-server-h6ol.onrender.com/all-data")
       .then((res) => res.json())
       .then((data) => setData(data));
   }

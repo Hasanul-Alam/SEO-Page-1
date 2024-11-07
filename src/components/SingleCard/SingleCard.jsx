@@ -41,7 +41,7 @@ export default function SingleCard({ data, heading, fetchData }) {
     console.log(updatedData)
     if (updatedData) {
       axios
-        .patch(`http://localhost:3000/all-data/${item._id}`, updatedData)
+        .patch(`https://seo-page-1-server-h6ol.onrender.com/all-data/${item._id}`, updatedData)
         .then((res) => {
           if (res.data.modifiedCount > 0) {
             alert("Attachment Uploaded Successfully");
@@ -200,7 +200,7 @@ export default function SingleCard({ data, heading, fetchData }) {
 
               {/* List Section */}
               <div className="w-[700px] overflow-auto pl-4 border-l border-gray-300">
-                <h3 className="text-md font-semibold mb-2">List of Items</h3>
+                <h3 className="text-md font-semibold mb-2">List of Attachments</h3>
                 <ul className="list-disc pl-5">
                   {selectedItem.attachments.map((item, index) => (
                     <li key={index} className="mb-2">
